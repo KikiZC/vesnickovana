@@ -1,155 +1,174 @@
+import heapq
 import pygame
-import os
 
-class Vesnice:
-    def __init__(self,x,y,p):
-        self.x = x
-        self.y = y
-        pygame.draw.circle(map_image,(0,255,0),(x,y),p)
+# Část první
+def dijkstra(graph, start, end):
+    distances = {node: float('inf') for node in graph}
+    distances[start] = 0
+    queue = [(0, start)]
+    predecessors = {}
+    predecessors_time = {}
+    while queue:
+        (current_distance, current_node) = heapq.heappop(queue)
+        time = []
+        if current_node == end:
+            path = []
+            current_time = current_node
+            while current_node in predecessors:
+                path.append(current_node)
+                current_node = predecessors[current_node]
+            path.append(start)
+            path.reverse()
+            while current_time in predecessors_time:
+                time.append(predecessors_time[current_time])
+                current_time = predecessors[current_time]
+                print(current_time)
+            print(predecessors_time)
+            time.append(0)
+            time.reverse()
+            return path, distances[end], time
+        if current_distance > distances[current_node]:
+            continue
+        for neighbor, weight in graph[current_node].items():
+            distance = current_distance + weight
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                heapq.heappush(queue, (distance, neighbor))
+                predecessors[neighbor] = current_node
+                predecessors_time[neighbor] = weight
+    return None, None
 
-def distance(x1, y1, x2, y2):
-    return ((x2 - x1)**2 + (y2 - y1)**2)**0.5
+graph = {
+    'A': {'O': 2},
+    'B': {'P': 2},
+    'C': {'P': 2},
+    'D': {'Q': 2},
+    'E': {'Q': 2},
+    'F': {'R': 2},
+    'G': {'S': 2},
+    'O': {'A': 2, 'P': 2, 'S': 4},
+    'P': {'O': 2, 'Q': 2, 'C': 2, 'B': 2},
+    'Q': {'P': 2, 'R': 2, 'D': 2, 'E': 2},
+    'R': {'Q': 2, 'S': 2, 'F': 2},
+    'S': {'R': 2, 'G': 3, 'O': 4}
+}
 
-class Cesta:
-    def __init__(self,x,y,p):
-        pygame.draw.circle(map_image,(255,0,0),(x,y),p)
+position = {
+    'A': {211,158},
+    'B': {747,279},
+    'C': {508,556},
+    'D': {1193,254},
+    'E': {1178,607},
+    'F': {917,991},
+    'G': {232,941},
+    'O': {388,296},
+    'P': {604,455},
+    'Q': {885,649},
+    'R': {892,793},
+    'S': {396,917}
+}
 
-class Skupina:
-    def __init__(self, nazev, pocatecni_bod, koncovy_bod):
-        self.nazev = nazev
-        self.pocatecni_bod = pocatecni_bod
-        self.koncovy_bod = koncovy_bod
+start = 'E'
+end = 'G'
 
-class Mapa:
-    def vykresli_skupiny(self, skupiny):
-        for skupina in skupiny:
-            # zjistíme, které body cesty je potřeba projít
-            body_cesty = [skupina.pocatecni_bod, skupina.koncovy_bod]
-            for cesta in cesty:
-                if cesta.collidepoint(skupina.pocatecni_bod) and cesta.collidepoint(skupina.koncovy_bod):
-                    body_cesty.append(cesta.center)
+path, distance, time = dijkstra(graph, start, end)
+if path is not None:
+    print(f"Skupina šla z bodu {start} do bodu {end} přes body: {path}")
+    print("                                         ", time)
+    print(f"Celková délka cesty: {distance}")
+else:
+    print(f"Nelze najít cestu z bodu {start} do bodu {end}") 
 
-            # namalujeme čáru mezi body cesty
-            pygame.draw.lines(map_image, (0,0,255), False, [bod.xy for bod in body_cesty], 5)
+#Konec části první
 
-def read_groups_from_file(filename):
-    groups = []
-    with open(filename, "r") as file:
-        for line in file:
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            fields = line.split(",")
-            if len(fields) != 3:
-                print(f"Invalid line in {filename}: {line}")
-                continue
-            group_name, start_village, end_village = fields
-            groups.append((group_name, start_village, end_village))
-    return groups
+# část druhá
 
-def create_group(start, end):
-    vesnice_list = [vesnice1, vesnice2, vesnice3, vesnice4, vesnice5, vesnice6, vesnice7]
-    cesta_list = [cesta1, cesta2, cesta3, cesta4, cesta5]
-    VESNICE_RADIUS = 10
+import pygame
+import math
 
-    # nalezení všech sousedních vesnic
-    neighbors = []
-    for vesnice in vesnice_list:
-        if distance(vesnice.x, vesnice.y, start[0], start[1]) <= VESNICE_RADIUS:
-            neighbors.append(vesnice)
+# Nastavení rozměrů okna a barvy pozadí
+WIDTH, HEIGHT = 1440, 1075
 
-    # nalezení nejkratší cesty z startu do konce
-    shortest_path = []
-    current = start
-    while current != end:
-        shortest_distance = None
-        next_vesnice = None
-        for neighbor in neighbors:
-            if neighbor in shortest_path:
-                continue
-            d = distance(current[0], current[1], neighbor[0], neighbor[1])
-            if shortest_distance is None or d < shortest_distance:
-                shortest_distance = d
-                next_vesnice = neighbor
-        if next_vesnice is None:
-            break
-        shortest_path.append(next_vesnice)
-        current = next_vesnice
+# Nastavení proměnných pro vzdálenosti a pozice bodů
+distance = time
+positions = {
+    'A': [208, 151],
+    'B': [752, 280],
+    'C': [506, 562],
+    'D': [1193, 254],
+    'E': [1178, 607],
+    'F': [920, 980],
+    'G': [240, 935],
+    'O': [388, 302],
+    'P': [604, 455],
+    'Q': [885, 649],
+    'R': [892, 793],
+    'S': [396, 917]
+}
 
-    # vytvoření cesty
-    for i in range(len(shortest_path)-1):
-        start_vesnice = shortest_path[i]
-        end_vesnice = shortest_path[i+1]
-        for cesta in cesta_list:
-            if (start_vesnice[0], start_vesnice[1]) == cesta[0:2] and (end_vesnice[0], end_vesnice[1]) == cesta[2:4]:
-                pygame.draw.line(map_image, (255, 0, 0), (start_vesnice[0], start_vesnice[1]), (end_vesnice[0], end_vesnice[1]), 5)
-                break
+# Funkce pro vykreslení cesty
+def draw_path(screen, path, start, end):
+    # Výpočet nejkratší cesty
+    shortest_path = [start]
+    while len(shortest_path) < len(path):
+        distances = [(p, math.dist(positions[shortest_path[-1]], positions[p])) for p in path if p not in shortest_path]
+        closest = min(distances, key=lambda x: x[1])[0]
+        shortest_path.append(closest)
 
-    # aktualizace obrazovky
-    pygame.display.update()
+    # Vykreslení pozadí
+    screen.blit(map_image, map_rect)
 
+    # Vykreslení bodů
+    for point, pos in positions.items():
+        color = (0, 0, 0)
+        if point == start or point == end:
+            color = (255, 0, 0)
+        pygame.draw.circle(screen, color, pos, 10)
 
+    # Vykreslení cesty skupiny
+    current_pos = positions[start]
+    for point in shortest_path:
+        next_pos = positions[point]
+        pygame.draw.line(screen, (0, 255, 0), current_pos, next_pos, 5)
+        current_pos = next_pos
 
-# inicializace Pygame
+    # Vykreslení skupiny
+    group_pos = positions[start]
+    for dist in distance:
+        if shortest_path:
+            next_point = shortest_path.pop(0)
+            next_pos = positions[next_point]
+            dx, dy = next_pos[0] - group_pos[0], next_pos[1] - group_pos[1]
+            direction = math.atan2(dy, dx)
+            group_pos = [int(group_pos[0] + dist * math.cos(direction)), int(group_pos[1] + dist * math.sin(direction))]
+            pygame.draw.circle(screen, (255, 0, 0), group_pos, 20)
+
+# Inicializace knihovny Pygame a okna
 pygame.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('Skupina na cestě')
 
-# nastavení velikosti okna
-window_size = (1434, 1075)
-screen = pygame.display.set_mode(window_size)
-
-# načtení obrázku mapy
 map_path = "c:/Users/kikiz/Desktop/map py/map3.jpg"
 map_image = pygame.image.load(map_path)
-
-# nastavení pozice a velikosti mapy na obrazovce
 map_rect = map_image.get_rect()
 map_rect.center = screen.get_rect().center
 
-# vesnice
-vesnice1 = Vesnice(211,158,10)
-vesnice2 = Vesnice(747,279,10)
-vesnice3 = Vesnice(508,556,10)
-vesnice4 = Vesnice(1193,254,10)
-vesnice5 = Vesnice(1178,607,10)
-vesnice6 = Vesnice(917,991,10)
-vesnice7 = Vesnice(232,941,10)
+# Nastavení startovacího a koncového bodu
+start = 'A'
+end = 'F'
 
-vesnice_list = [vesnice1, vesnice2, vesnice3, vesnice4 ,vesnice5 ,vesnice6, vesnice7]
-# cesty
-cesta1 = Cesta(388,296,10)
-cesta2 = Cesta(604,455,10)
-cesta3 = Cesta(885,649,10)
-cesta4 = Cesta(892,793,10)
-cesta5 = Cesta(396,917,10)
-
-# seznam skupin
-skupiny = []
-
-# přidání nové skupiny
-skupiny.append(Skupina("Skupina 1", vesnice1, vesnice3))
-
-
-while True:
-    # zpracování událostí
+# Hlavní smyčka hry
+running = True
+while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            pygame.quit()
-            quit()
+            running = False
 
-    # vykreslení mapy do okna
-    screen.blit(map_image, map_rect)
+    # Vykreslení cesty a skupiny
+    draw_path(screen, path, start, end)
 
-    # aktualizace obrazovky
+    # Zobrazit vykreslené objekty na obrazovce
     pygame.display.update()
 
-    # přečtení souboru a vytvoření skupin
-    groups = read_groups_from_file("c:/Users/kikiz/Desktop/map py/skupiny.txt")
-    for group in groups:
-        start_vesnice = group[0]
-        end_vesnice = group[1]
-        create_group(start_vesnice, end_vesnice)
-
-    # pauza
-    pygame.time.delay(1000) # počkej 1 sekundu
-    # aktualizace obrazovky
-    pygame.display.update()
+# Ukončení Pygame
+pygame.quit()
