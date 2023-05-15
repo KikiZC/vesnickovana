@@ -1,7 +1,6 @@
+# první část = výpočet nejkradší cesty
 import heapq
-import pygame
 
-# Část první
 def dijkstra(graph, start, end):
     distances = {node: float('inf') for node in graph}
     distances[start] = 0
@@ -39,37 +38,25 @@ def dijkstra(graph, start, end):
     return None, None
 
 graph = {
-    'A': {'O': 2},
-    'B': {'P': 2},
-    'C': {'P': 2},
-    'D': {'Q': 2},
-    'E': {'Q': 2},
-    'F': {'R': 2},
-    'G': {'S': 2},
-    'O': {'A': 2, 'P': 2, 'S': 4},
-    'P': {'O': 2, 'Q': 2, 'C': 2, 'B': 2},
-    'Q': {'P': 2, 'R': 2, 'D': 2, 'E': 2},
-    'R': {'Q': 2, 'S': 2, 'F': 2},
-    'S': {'R': 2, 'G': 3, 'O': 4}
+    'A': {'K': 2},
+    'B': {'K': 2},
+    'C': {'L': 2},
+    'D': {'L': 2},
+    'E': {'M': 3},
+    'F': {'O': 2},
+    'G': {'O': 2},
+    'H': {'N': 2},
+    'I': {'N': 2},
+    'J': {'N': 2},
+    'K': {'A': 2, 'B': 2, 'L': 2},
+    'L': {'C': 2, 'D': 2, 'K': 2, 'M': 2},
+    'M': {'L': 2, 'N': 2, 'O': 2, 'E': 2},
+    'N': {'H': 2, 'I': 2, 'J': 4, 'M': 2},
+    'O': {'M': 2, 'G': 2, 'H': 2}
 }
 
-position = {
-    'A': {211,158},
-    'B': {747,279},
-    'C': {508,556},
-    'D': {1193,254},
-    'E': {1178,607},
-    'F': {917,991},
-    'G': {232,941},
-    'O': {388,296},
-    'P': {604,455},
-    'Q': {885,649},
-    'R': {892,793},
-    'S': {396,917}
-}
-
-start = 'E'
-end = 'G'
+start = 'A'
+end = 'I'
 
 path, distance, time = dijkstra(graph, start, end)
 if path is not None:
@@ -78,97 +65,102 @@ if path is not None:
     print(f"Celková délka cesty: {distance}")
 else:
     print(f"Nelze najít cestu z bodu {start} do bodu {end}") 
+# první část konec
 
-#Konec části první
 
-# část druhá
+
+# druhá část začátek = zobrazení skupinky
 
 import pygame
-import math
+import sys
 
-# Nastavení rozměrů okna a barvy pozadí
 WIDTH, HEIGHT = 1440, 1075
-
-# Nastavení proměnných pro vzdálenosti a pozice bodů
-distance = time
-positions = {
-    'A': [208, 151],
-    'B': [752, 280],
-    'C': [506, 562],
-    'D': [1193, 254],
-    'E': [1178, 607],
-    'F': [920, 980],
-    'G': [240, 935],
-    'O': [388, 302],
-    'P': [604, 455],
-    'Q': [885, 649],
-    'R': [892, 793],
-    'S': [396, 917]
-}
-
-# Funkce pro vykreslení cesty
-def draw_path(screen, path, start, end):
-    # Výpočet nejkratší cesty
-    shortest_path = [start]
-    while len(shortest_path) < len(path):
-        distances = [(p, math.dist(positions[shortest_path[-1]], positions[p])) for p in path if p not in shortest_path]
-        closest = min(distances, key=lambda x: x[1])[0]
-        shortest_path.append(closest)
-
-    # Vykreslení pozadí
-    screen.blit(map_image, map_rect)
-
-    # Vykreslení bodů
-    for point, pos in positions.items():
-        color = (0, 0, 0)
-        if point == start or point == end:
-            color = (255, 0, 0)
-        pygame.draw.circle(screen, color, pos, 10)
-
-    # Vykreslení cesty skupiny
-    current_pos = positions[start]
-    for point in shortest_path:
-        next_pos = positions[point]
-        pygame.draw.line(screen, (0, 255, 0), current_pos, next_pos, 5)
-        current_pos = next_pos
-
-    # Vykreslení skupiny
-    group_pos = positions[start]
-    for dist in distance:
-        if shortest_path:
-            next_point = shortest_path.pop(0)
-            next_pos = positions[next_point]
-            dx, dy = next_pos[0] - group_pos[0], next_pos[1] - group_pos[1]
-            direction = math.atan2(dy, dx)
-            group_pos = [int(group_pos[0] + dist * math.cos(direction)), int(group_pos[1] + dist * math.sin(direction))]
-            pygame.draw.circle(screen, (255, 0, 0), group_pos, 20)
-
-# Inicializace knihovny Pygame a okna
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Skupina na cestě')
 
-map_path = "c:/Users/kikiz/Desktop/map py/map3.jpg"
+map_path = "c:/Users/kikiz/Desktop/map py/map 4.jpg"
 map_image = pygame.image.load(map_path)
 map_rect = map_image.get_rect()
 map_rect.center = screen.get_rect().center
 
-# Nastavení startovacího a koncového bodu
-start = 'A'
-end = 'F'
+# Tabulka s pozicemi bodů
+table = {
+    'A': (211, 163),
+    'B': (560, 152),
+    'C': (257, 507),
+    'D': (604, 366),
+    'E': (461, 821),
+    'F': (873, 529),
+    'G': (988, 185),
+    'H': (1250, 677),
+    'I': (1205, 928),
+    'J': (930, 894),
+    'K': (377, 183),
+    'L': (395, 470),
+    'M': (637, 639),
+    'N': (930, 666),
+    'O': (814, 334),
+}
 
-# Hlavní smyčka hry
-running = True
-while running:
+# Vstupní seznam bodů
+input_points = path
+
+# Rychlost pohybu tečky (v pixelech za sekundu)
+velocity = 5
+
+# Počáteční pozice tečky
+x, y = table[input_points[0]]
+
+# Index aktuálního bodu v seznamu
+current_point = 0
+
+# Hlavní smyčka programu
+while True:
+    # Zpracování událostí
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
+            pygame.quit()
+            sys.exit()
 
-    # Vykreslení cesty a skupiny
-    draw_path(screen, path, start, end)
+    # Kontrola, zda existuje další bod v seznamu
+    if current_point < len(input_points) - 1:
+        # Získání aktuálního a následujícího bodu
+        current_point_name = input_points[current_point]
+        next_point_name = input_points[current_point + 1]
 
-    # Zobrazit vykreslené objekty na obrazovce
-    pygame.display.update()
+        # Získání aktuální a následující pozice
+        current_x, current_y = table[current_point_name]
+        next_x, next_y = table[next_point_name]
 
-# Ukončení Pygame
-pygame.quit()
+        # Výpočet vzdálenosti mezi body
+        distance = ((next_x - current_x) ** 2 + (next_y - current_y) ** 2) ** 0.5
+
+        # Výpočet směru pohybu tečky
+        direction_x = (next_x - current_x) / distance
+        direction_y = (next_y - current_y) / distance
+
+        # Pohyb tečky směrem k následujícímu bodu
+        if distance > 0:
+            x += direction_x * min(distance, velocity)
+            y += direction_y * min(distance, velocity)
+
+        # Kontrola dosažení následujícího bodu
+        if (direction_x > 0 and x >= next_x) or (direction_x < 0 and x <= next_x) or (direction_y > 0 and y >= next_y) or (direction_y < 0 and y <= next_y):
+            current_point += 1
+
+            # Zastavení tečky na bodě
+            x, y = next_x, next_y
+
+    # Vykreslení pozadí
+    #screen.fill((0, 0, 0))
+    screen.blit(map_image, map_rect)
+
+    # Vykreslení tečky
+    pygame.draw.circle(screen, (0, 255, 0), (int(x), int(y)), 15)
+
+    # Aktualizace obrazovky
+    pygame.display.flip()
+
+    # Pauza mezi snímky (časování 60 FPS)
+    pygame.time.Clock().tick(60)
