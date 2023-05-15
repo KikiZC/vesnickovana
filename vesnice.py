@@ -79,7 +79,7 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Skupina na cestě')
 
-map_path = "c:/Users/kikiz/Desktop/map py/map 4.jpg"
+map_path = "map.jpg"
 map_image = pygame.image.load(map_path)
 map_rect = map_image.get_rect()
 map_rect.center = screen.get_rect().center
